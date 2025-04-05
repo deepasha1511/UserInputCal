@@ -11,52 +11,57 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'master', url: 'https://github.com/deepasha1511/UserInputCal.git'
+                git branch: 'main', url: 'https://github.com/deepasha1511/UserInputCal.git'
             }
         }
 
         stage('Terraform Init') {
             steps {
-                sh 'terraform init'
+                bat 'terraform init'
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                sh '''
-                    terraform plan \
-                      -var "client_id=$ARM_CLIENT_ID" \
-                      -var "client_secret=$ARM_CLIENT_SECRET" \
-                      -var "tenant_id=$ARM_TENANT_ID" \
-                      -var "subscription_id=$ARM_SUBSCRIPTION_ID"
+                bat '''
+                    terraform plan ^
+                      -var="client_id=%ARM_CLIENT_ID%" ^
+                      -var="client_secret=%ARM_CLIENT_SECRET%" ^
+                      -var="tenant_id=%ARM_TENANT_ID%" ^
+                      -var="subscription_id=%ARM_SUBSCRIPTION_ID%"
                 '''
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                sh '''
-                terraform apply -auto-approve \
-                  -var "client_id=$ARM_CLIENT_ID" \
-                  -var "client_secret=$ARM_CLIENT_SECRET" \
-                  -var "tenant_id=$ARM_TENANT_ID" \
-                  -var "subscription_id=$ARM_SUBSCRIPTION_ID"
+                bat '''
+                terraform apply -auto-approve ^
+                  -var="client_id=%ARM_CLIENT_ID%" ^
+                  -var="client_secret=%ARM_CLIENT_SECRET%" ^
+                  -var="tenant_id=%ARM_TENANT_ID%" ^
+                  -var="subscription_id=%ARM_SUBSCRIPTION_ID%"
                 '''
             }
         }
 
-        stage('Build .NET App') {
+        stage('Build .NET Application') {
             steps {
-                dir('UserInputCal') {
-                    sh 'dotnet publish -c Release -o publish'
-                }
+                bat '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe" UserInputCal.sln /p:Configuration=Release'
+            }
+        }
+
+        stage('Package Application') {
+            steps {
+                bat '''
+                powershell Compress-Archive -Path bin\\Release\\* -DestinationPath publish.zip -Force
+                '''
             }
         }
 
         stage('Deploy to Azure') {
             steps {
-                sh '''
-                zip -r publish.zip UserInputCal/publish/
+                bat '''
                 az webapp deployment source config-zip --resource-group UserInputCalRG --name UserInputCalApp --src publish.zip
                 '''
             }
@@ -68,7 +73,6 @@ pipeline {
             echo 'Deployment Successful!'
         }
         failure {
-            echo 'Deployment Failed!'
-        }
+            echo 'Deployment Failed!'        }
     }
 }
