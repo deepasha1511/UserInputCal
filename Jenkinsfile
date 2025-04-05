@@ -17,18 +17,18 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                bat 'terraform init -input=false -no-color'
+                bat 'terraform init'
             }
         }
 
         stage('Terraform Plan') {
             steps {
                 bat '''
-                     terraform plan -out=tfplan ^
-                      -var="client_id=%ARM_CLIENT_ID%" ^
-                      -var="client_secret=%ARM_CLIENT_SECRET%" ^
-                      -var="tenant_id=%ARM_TENANT_ID%" ^
-                      -var="subscription_id=%ARM_SUBSCRIPTION_ID%"
+                     terraform plan ^
+                     -var client_id=%ARM_CLIENT_ID% ^
+                      -var client_secret=%ARM_CLIENT_SECRET% ^
+                      -var tenant_id=%ARM_TENANT_ID% ^
+                      -var subscription_id=%ARM_SUBSCRIPTION_ID%
                 '''
             }
         }
@@ -36,11 +36,11 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 bat '''
-                terraform apply -auto-approve tfplan^
-                  -var="client_id=%ARM_CLIENT_ID%" ^
-                  -var="client_secret=%ARM_CLIENT_SECRET%" ^
-                  -var="tenant_id=%ARM_TENANT_ID%" ^
-                  -var="subscription_id=%ARM_SUBSCRIPTION_ID%"
+                terraform apply -auto-approve ^
+                   -var client_id=%ARM_CLIENT_ID% ^
+                  -var client_secret=%ARM_CLIENT_SECRET% ^
+                  -var tenant_id=%ARM_TENANT_ID% ^
+                  -var subscription_id=%ARM_SUBSCRIPTION_ID%
                 '''
             }
         }
