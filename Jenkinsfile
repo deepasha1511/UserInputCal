@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/deepasha1511/UserInputCal.git'
+                git branch: 'master', url: 'https://github.com/deepasha1511/UserInputCal.git'
             }
         }
 
@@ -73,6 +73,7 @@ pipeline {
             echo 'Deployment Successful!'
         }
         failure {
-            echo 'Deployment Failed!'        }
+            echo 'Deployment Failed!'
+        }
     }
 }
