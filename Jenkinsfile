@@ -17,14 +17,14 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                bat 'terraform init'
+                bat 'terraform init -input=false -no-color'
             }
         }
 
         stage('Terraform Plan') {
             steps {
                 bat '''
-                    terraform plan ^
+                     terraform plan -out=tfplan ^
                       -var="client_id=%ARM_CLIENT_ID%" ^
                       -var="client_secret=%ARM_CLIENT_SECRET%" ^
                       -var="tenant_id=%ARM_TENANT_ID%" ^
@@ -36,7 +36,7 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 bat '''
-                terraform apply -auto-approve ^
+                terraform apply -auto-approve tfplan^
                   -var="client_id=%ARM_CLIENT_ID%" ^
                   -var="client_secret=%ARM_CLIENT_SECRET%" ^
                   -var="tenant_id=%ARM_TENANT_ID%" ^
