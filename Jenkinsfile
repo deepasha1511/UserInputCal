@@ -17,51 +17,46 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                bat 'terraform init'
+                sh 'terraform init'
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                bat '''
-                    terraform plan ^
-                      -var="client_id=%ARM_CLIENT_ID%" ^
-                      -var="client_secret=%ARM_CLIENT_SECRET%" ^
-                      -var="tenant_id=%ARM_TENANT_ID%" ^
-                      -var="subscription_id=%ARM_SUBSCRIPTION_ID%"
+                sh '''
+                    terraform plan \
+                      -var "client_id=$ARM_CLIENT_ID" \
+                      -var "client_secret=$ARM_CLIENT_SECRET" \
+                      -var "tenant_id=$ARM_TENANT_ID" \
+                      -var "subscription_id=$ARM_SUBSCRIPTION_ID"
                 '''
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                bat '''
-                terraform apply -auto-approve ^
-                  -var="client_id=%ARM_CLIENT_ID%" ^
-                  -var="client_secret=%ARM_CLIENT_SECRET%" ^
-                  -var="tenant_id=%ARM_TENANT_ID%" ^
-                  -var="subscription_id=%ARM_SUBSCRIPTION_ID%"
+                sh '''
+                terraform apply -auto-approve \
+                  -var "client_id=$ARM_CLIENT_ID" \
+                  -var "client_secret=$ARM_CLIENT_SECRET" \
+                  -var "tenant_id=$ARM_TENANT_ID" \
+                  -var "subscription_id=$ARM_SUBSCRIPTION_ID"
                 '''
             }
         }
 
-        stage('Build .NET Application') {
+        stage('Build .NET App') {
             steps {
-                bat '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe" UserInputCal.sln /p:Configuration=Release'
-            }
-        }
-
-        stage('Package Application') {
-            steps {
-                bat '''
-                powershell Compress-Archive -Path bin\\Release\\* -DestinationPath publish.zip -Force
-                '''
+                dir('UserInputCal') {
+                    sh 'dotnet publish -c Release -o publish'
+                }
             }
         }
 
         stage('Deploy to Azure') {
             steps {
-                bat '''
+                sh '''
+                zip -r publish.zip UserInputCal/publish/
                 az webapp deployment source config-zip --resource-group UserInputCalRG --name UserInputCalApp --src publish.zip
                 '''
             }
