@@ -47,14 +47,14 @@ pipeline {
 
         stage('Build .NET Application') {
             steps {
-                bat '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe" UserInputCal.sln /p:Configuration=Release'
+                bat '"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\MSBuild.exe" UserInputCal.sln /p:Configuration=Release'
             }
         }
 
         stage('Package Application') {
             steps {
                 bat '''
-                powershell Compress-Archive -Path bin\\Release\\* -DestinationPath publish.zip -Force
+                powershell Compress-Archive -Path Release\\* -DestinationPath publish.zip -Force
                 '''
             }
         }
