@@ -2,7 +2,7 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "rgd" {
+resource "azurerm_resource_group" "rg" {
   name     = "UserInputCalRG"
   location = "East US"
 }
